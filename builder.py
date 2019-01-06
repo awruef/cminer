@@ -23,6 +23,8 @@ def get_repo(name, url, tree, basedir):
 
     return r.working_dir
 
+CMAKE_CMD = "cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON {}"
+
 def build_cmake(srcdir):
     """
     Invoke cmake and make, with arguments to emit compile_commands.json.
@@ -31,9 +33,12 @@ def build_cmake(srcdir):
     buildir = "{}/build.obj".format(srcdir)
     if not os.path.exists(buildir):
         os.mkdir(buildir)
-  
-    subprocess.check_call("cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON {}".format(srcdir), shell=True, cwd=buildir)
-    subprocess.check_call("make", shell=True, cwd=buildir)
+ 
+    try:
+        subprocess.check_call(CMAKE_CMD.format(srcdir), shell=True, cwd=buildir)
+        subprocess.check_call("make", shell=True, cwd=buildir)
+    except Exception:
+        return ""
 
     return "{}/compile_commands.json".format(buildir)
 
